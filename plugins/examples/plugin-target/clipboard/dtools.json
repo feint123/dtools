@@ -1,0 +1,14 @@
+{
+    "name": "历史剪切板",
+    "author": "Feint",
+    "desc": "这是一款剪切板历史工具,好耶！",
+    "version": "0.0.1",
+    "searchable": false,
+    "identifier": "com.feint.plugins",
+    "repository": "https://github.com/feint-demos",
+    "category": ["tools"],
+    "search-words": [""],
+    "support-modes":["window"],
+    "fileScope": [""],
+    "httpScope": [""]
+}
