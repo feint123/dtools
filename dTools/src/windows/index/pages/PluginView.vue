@@ -203,6 +203,22 @@ function startMove() {
 </template>
 
 <style scoped>
+
+.titlebar-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 45px;
+  height: var(--toolbar-height);
+}
+
+.titlebar-button:hover, .titlebar-button.el-tag:active {
+  background: var(--el-fill-color-dark);
+}
+#titlebar-close:hover, .el-header #titlebar-close .el-icon:hover {
+    background-color: var(--el-color-danger);
+}
+
 .plugin-item-bottom {
     display: flex;
     justify-content: space-between;

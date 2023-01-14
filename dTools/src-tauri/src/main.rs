@@ -10,7 +10,7 @@ use std::{sync::atomic::{AtomicBool, Ordering}};
 
 use mouse_position::mouse_position::Mouse;
 
-use native::{native_windows};
+use native::{native_windows, create_main_window};
 use tauri::{
     AppHandle, CustomMenuItem, LogicalSize, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
     SystemTrayMenuItem, Window,
@@ -65,11 +65,8 @@ fn main() {
         .manage(SpotilightState(AtomicBool::new(false)))
         .setup(|app| {
             // 根据label获取窗口实例
-            let window = app.get_window("main").unwrap();
+            let window = create_main_window(&app.handle());
             // window.open_devtools();
-            // 窗口本地化设置
-            native_windows(&window, None, true);
-            // 快捷剪切板窗口默认隐藏
             Ok(())
         })
         .plugin(TauriSql::default())

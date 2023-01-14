@@ -1,13 +1,26 @@
 <script setup>
 import {platformStyle} from '../assets/js/styles'
+import WindowsController from "./WindowsController.vue";
+import { type } from '@tauri-apps/api/os';
+import { onMounted, ref } from 'vue';
+
 
 const { headerStyle, innerMainStyle } = platformStyle();
+
+const isWindows = ref(false);
+
+onMounted(async()=> {
+    const osType = await type();
+    isWindows.value = osType ==='Windows_NT';
+})
+
 
 </script>
 
 <template>
     <el-container>
         <el-header :style="headerStyle" data-tauri-drag-region class="unselectable">
+            <WindowsController v-if="isWindows"/>
             <slot name="header"></slot>
         </el-header>
         <el-main class="unselectable" :style="innerMainStyle">

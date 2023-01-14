@@ -67,22 +67,7 @@
       "active": false
     },
     "windows": [
-      {
-        "fullscreen": false,
-        "height": 600,
-        "resizable": true,
-        "title": "dTools",
-        "width": 800,
-        "titleBarStyle": "Overlay",
-        "hiddenTitle": true,
-        "transparent": true,
-        "minHeight": 600,
-        "minWidth": 800,
-        "label": "main",
-        "acceptFirstMouse": true,
-        "url": "index.html",
-        "tabbingIdentifier": "test"
-      }
+     
     ],
     "systemTray": {
       "iconPath": "icons/icon.png",
