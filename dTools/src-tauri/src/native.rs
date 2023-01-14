@@ -83,24 +83,26 @@ pub fn create_main_window(app: &AppHandle) -> Window {
       }
  */
 #[cfg(target_os = "macos")]
-fn create_main_window(app: &AppHandle) -> Window {
-    use tauri::{AppHandle, LogicalSize};
-
+pub fn create_main_window(app: &AppHandle) -> Window {
     let main_window = tauri::WindowBuilder::new(
         app,
         "main", /* the unique window label */
         tauri::WindowUrl::App("index.html".parse().unwrap()),
     )
     .transparent(true)
+    .decorations(true)
     .resizable(true)
     .visible(true)
+    .accept_first_mouse(true)
+    .hidden_title(true)
+    .title_bar_style(tauri::TitleBarStyle::Overlay)
     .build()
     .expect("failed to build window");
     main_window
         .set_size(LogicalSize::new(800, 600))
         .expect("failed to set size");
     main_window.set_min_size(Some(LogicalSize::new(800, 600))).expect("failed to set min size");
-    native_windows(&spotlight_window, Some(10.), false);
-    return spotlight_window;
+    native_windows(&main_window, None, true);
+    return main_window;
 }
 
