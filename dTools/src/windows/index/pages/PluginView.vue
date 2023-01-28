@@ -3,11 +3,13 @@ import { onMounted, ref, h, reactive, onBeforeUnmount } from "vue";
 import { renderToString } from "vue/server-renderer";
 import { platformStyle } from '../../../assets/js/styles'
 import { selectLocalWindowPlugin } from '../../../assets/js/db'
+import { dToolsIPC } from '../../../assets/js/dtoosIPC';
 import { dToolsEvent } from '../../../assets/js/events'
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { appDataDir, resolve } from '@tauri-apps/api/path';
 import { importPluginFromLocal, uninstallPlugin } from "../../../assets/js/plugin";
 import NomalPanel from "../../../components/NomalPanel.vue";
+import PluginItem from "../components/PluginItem.vue";
 import { useToggle } from "@vueuse/shared";
 import { computed } from "@vue/reactivity";
 import { message } from '@tauri-apps/api/dialog';
@@ -36,27 +38,7 @@ const unlisten = reactive({
 
 // 初始化插件
 async function initPlugin() {
-    pluginFrame.value.contentWindow.__TAURI_INVOKE__ = window.__TAURI_INVOKE__;
-    pluginFrame.value.contentWindow.__TAURI_IPC__ = window.__TAURI_IPC__;
-    pluginFrame.value.contentWindow.__TAURI__ = window.__TAURI__;
-    // 使得iframe中的内容支持拖拽
-    pluginFrame.value.contentWindow.addEventListener('mousedown', (e) => {
-        if (e.target.hasAttribute('data-tauri-drag-region') && e.buttons === 1) {
-            // prevents text cursor
-            e.preventDefault()
-            window.__TAURI_INVOKE__('tauri', {
-                __tauriModule: 'Window',
-                message: {
-                    cmd: 'manage',
-                    data: {
-                        cmd: {
-                            type: e.detail === 2 ? '__toggleMaximize' : 'startDragging'
-                        }
-                    }
-                }
-            })
-        }
-    })
+    pluginFrame.value.contentWindow.__DTOOLS_IPC__ = dToolsIPC();
     const frameDoc = pluginFrame.value.contentWindow.document;
     const pluginNode = h('div', { id: 'plugin-container' }, [
         h('div', { id: 'plugin' }),
@@ -67,6 +49,8 @@ async function initPlugin() {
     script.src = scriptSrc.value;
     frameDoc.body.appendChild(script);
     frameDoc.body.innerHTML = await renderToString(pluginNode);
+    // 初始化消息通信
+    pluginFrame.value.contentWindow.__DTOOLS_IPC__.init();
 }
 
 onMounted(async () => {
@@ -131,10 +115,6 @@ function choosePlugin(item) {
 
 }
 
-function unPlugin(event, item) {
-    uninstallPlugin(item);
-    // event.stopPropagation();
-}
 
 function startDrag(event) {
 
@@ -169,22 +149,7 @@ function startMove() {
                             <template #title>
                                 已安装 &nbsp<el-tag size="small" round>{{ pluginList.length }}</el-tag>
                             </template>
-                            <div v-for="item in pluginList" class="plugin-item" @click="choosePlugin(item)">
-                                <el-row>
-                                    <el-col :span="6" style="justify-content: center; display: flex;">
-                                        <el-avatar shape="square" :size="50" fit="fit" :src="item.icon" />
-                                    </el-col>
-                                    <el-col :span="18">
-                                        <el-row><span class="multi-text title">{{ item.name }}</span></el-row>
-                                        <el-row><span class="multi-text desc">{{ item.desc }}</span></el-row>
-                                        <div class="plugin-item-bottom">
-                                            <el-row><span class="multi-text author">{{ item.author }}</span></el-row>
-                                            <el-link :icon="Delete" @click="unPlugin(event, item)"
-                                                :underline="false"></el-link>
-                                        </div>
-                                    </el-col>
-                                </el-row>
-                            </div>
+                            <PluginItem v-for="item in pluginList" :model="item" @click="choosePlugin(item)"/>
                         </el-collapse-item>
                         <el-collapse-item title="推荐" name="2">
 
@@ -203,29 +168,6 @@ function startMove() {
 </template>
 
 <style scoped>
-
-.titlebar-button {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: 45px;
-  height: var(--toolbar-height);
-}
-
-.titlebar-button:hover, .titlebar-button.el-tag:active {
-  background: var(--el-fill-color-dark);
-}
-#titlebar-close:hover, .el-header #titlebar-close .el-icon:hover {
-    background-color: var(--el-color-danger);
-}
-
-.plugin-item-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-
 
 .el-main,
 :deep().el-main {
@@ -258,43 +200,12 @@ function startMove() {
   background-color: var(--el-fill-color-light);
 } */
 
-.plugin-item {
-    padding: 4px 0;
-    padding-right: 16px;
-    line-height: 1.3;
-    background-color: var(--el-fill-color-lighter);
-    transition: 0.2s background-color ease-in;
-}
-
-.plugin-item:hover {
-    background-color: var(--el-fill-color-light);
-}
 
 .plugin-container {
     width: 100%;
     border: none;
     background-color: var(--el-bg-color);
     overflow: hidden;
-}
-
-.multi-text {
-    -webkit-line-clamp: 1;
-}
-
-.multi-text.author {
-    font-size: var(--el-font-size-extra-small);
-    color: var(--el-text-color-regular);
-    font-weight: bold;
-}
-
-.multi-text.desc {
-    font-size: var(--el-font-size-small);
-    color: var(--el-text-color-secondary);
-}
-
-.multi-text.title {
-    font-size: var(--el-font-size-base);
-    font-weight: bold;
 }
 
 :deep() .el-collapse {

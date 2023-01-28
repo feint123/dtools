@@ -1,4 +1,4 @@
-import Database from 'tauri-plugin-sql-api';
+import Database from 'dtools-api/dist/database';
 
 
 const dbName = "test.db";
@@ -37,6 +37,7 @@ export function selectAllClips(handleFunc) {
     db.then((database) => {
         database.select('SELECT * FROM CLIPBOARD ORDER by ADD_TIME DESC;', [])
             .then((result) => {
+                console.log('clipboard',result);
                 if (result.length > 0) {
                     handleFunc(result);
                 }

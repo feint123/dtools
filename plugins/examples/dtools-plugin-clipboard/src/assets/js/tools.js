@@ -2,34 +2,33 @@
 import { ElMessage } from 'element-plus';
 import { checkClipExsits, updateCLipAddTimeByMd5, insertClip } from './db';
 import { useDateFormat } from "@vueuse/shared";
-import { invoke } from '@tauri-apps/api/tauri';
+import { readClipboard, writeClipboard } from 'dtools-api/dist/clipboard';
 import { useArrayFind } from "@vueuse/shared";
-import { exists } from '@tauri-apps/api/fs'
-import { appWindow } from '@tauri-apps/api/window'
-import { convertFileSrc } from '@tauri-apps/api/tauri';
+import { exists } from 'dtools-api/dist/fs';
+import { convertFileSrc } from 'dtools-api/dist/ipc';
 
-const clipLockKey = appWindow.label + ":current_cb_md5"
+const clipLockKey = "current_cb_md5"
 
-export async function mousePosition() {
-    const pos = await invoke("mouse_position", {});
-    return pos;
-}
+// export async function mousePosition() {
+//     const pos = await invoke("mouse_position", {});
+//     return pos;
+// }
 
 export async function paste() {
     const cMd5 = localStorage.getItem(clipLockKey);
-    const clipboard = await invoke('read_clipboard', { currentMd5: cMd5 == null ? "" : cMd5 });
-    if (clipboard.clip_type == 1) {
+    const clipboard = await readClipboard();
+    if (clipboard.clipType == 1) {
         return {
-            content: clipboard.text_content,
-            type: clipboard.clip_type,
-            md5: clipboard.content_md5,
+            content: clipboard.textContent,
+            type: clipboard.clipType,
+            md5: clipboard.contentMd5,
         }
-    } else if (clipboard.clip_type == 2) {
+    } else if (clipboard.clipType == 2) {
         // console.log(clipboard.image_content.length);
         return {
-            content: clipboard.file_path,
-            type: clipboard.clip_type,
-            md5: clipboard.content_md5,
+            content: clipboard.filePath,
+            type: clipboard.clipType,
+            md5: clipboard.contentMd5,
         }
     } else {
         return {
@@ -100,7 +99,7 @@ export function insertToClipArr(result, arrRef) {
 
 export async function copied(content, type, showContent=false) {
     try {
-        await invoke('write_clipboard', { content: content, clipType: type });
+        writeClipboard(type, content);
         ElMessage({
             message: "复制成功" + (showContent ? `: ${content}`: ""),
             grouping: true,

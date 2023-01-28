@@ -2,7 +2,7 @@
     "name": "编码转换",
     "author": "Feint",
     "desc": "集成常见的编码转换功能",
-    "version": "0.0.1",
+    "version": "0.0.4",
     "searchable": false,
     "identifier": "com.feint.plugins",
     "repository": "https://github.com/feint-demos",

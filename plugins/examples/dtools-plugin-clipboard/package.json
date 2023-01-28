@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.2.0",
+    "dtools-api": "github:feint123/dtools-api",
     "element-plus": "^2.2.28",
-    "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#dev",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },

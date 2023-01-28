@@ -168,6 +168,7 @@ async function transferFiles(fileMap, config) {
     await createDir(iconPath, { dir: BaseDirectory.AppData, recursive: true });
     // 复制src文件
     for (const file of fileMap['src'].children) {
+        if (file.name === '.DS_Store') continue;
         await copyFile(`${file.path}`, `${srcPath}/${file.name}`, { dir: BaseDirectory.AppData });
     }
     // todo 复制asset文件

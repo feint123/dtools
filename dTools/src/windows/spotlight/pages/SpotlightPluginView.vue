@@ -5,6 +5,7 @@ import { renderToString } from "vue/server-renderer";
 import { platformStyle } from '../../../assets/js/styles'
 import { appDataDir, resolve } from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
+import { dToolsIPC } from '../../../assets/js/dtoosIPC';
 
 const route = useRoute()
 const { innerMainStyle, innerAsideStyle } = platformStyle();
@@ -14,27 +15,7 @@ const scriptSrc = ref("");
 
 // 初始化插件
 async function initPlugin() {
-    pluginFrame.value.contentWindow.__TAURI_INVOKE__ = window.__TAURI_INVOKE__;
-    pluginFrame.value.contentWindow.__TAURI_IPC__ = window.__TAURI_IPC__;
-    pluginFrame.value.contentWindow.__TAURI__ = window.__TAURI__;
-    // 使得iframe中的内容支持拖拽
-    pluginFrame.value.contentWindow.addEventListener('mousedown', (e) => {
-        if (e.target.hasAttribute('data-tauri-drag-region') && e.buttons === 1) {
-            // prevents text cursor
-            e.preventDefault()
-            window.__TAURI_INVOKE__('tauri', {
-                __tauriModule: 'Window',
-                message: {
-                    cmd: 'manage',
-                    data: {
-                        cmd: {
-                            type: e.detail === 2 ? '__toggleMaximize' : 'startDragging'
-                        }
-                    }
-                }
-            })
-        }
-    })
+    pluginFrame.value.contentWindow.__DTOOLS_IPC__ = dToolsIPC();
     const frameDoc = pluginFrame.value.contentWindow.document;
     const pluginNode = h('div', { id: 'plugin-container' }, [
         h('div', { id: 'plugin' }),
@@ -45,6 +26,7 @@ async function initPlugin() {
     script.src = scriptSrc.value;
     frameDoc.body.appendChild(script);
     frameDoc.body.innerHTML = await renderToString(pluginNode);
+    pluginFrame.value.contentWindow.__DTOOLS_IPC__.init();
 }
 
 onMounted(async () => {

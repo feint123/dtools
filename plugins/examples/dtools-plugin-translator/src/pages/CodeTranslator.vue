@@ -124,7 +124,7 @@ onMounted(()=> {
                 <el-form-item label="标准时间 :">
                     <el-input v-model="encodeForm.datetime" disabled>
                         <template #append>
-                            <el-button @click="copy(encodeForm.datetime)" plain>复制</el-button>
+                            <el-button @click="copied(encodeForm.datetime)" plain>复制</el-button>
                         </template>
                     </el-input>
                 </el-form-item>
@@ -137,7 +137,7 @@ onMounted(()=> {
                 <el-form-item label="时间戳 :">
                     <el-input v-model="encodeForm.stTimestampe" disabled>
                         <template #append>
-                            <el-button @click="copy(encodeForm.stTimestampe.toString())" plain>复制</el-button>
+                            <el-button @click="copied(encodeForm.stTimestampe.toString())" plain>复制</el-button>
                         </template>
                     </el-input>
                 </el-form-item>

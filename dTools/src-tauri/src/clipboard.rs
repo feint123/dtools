@@ -3,9 +3,13 @@ use std::{path::Path, fs, rc::Rc};
 
 #[derive(serde::Serialize, Default)]
 pub struct ClipboardData {
+    #[serde(rename = "clipType")]
     clip_type: i8,
+    #[serde(rename = "textContent")]
     text_content: String,
+    #[serde(rename = "filePath")]
     file_path: String,
+    #[serde(rename = "contentMd5")]
     content_md5: String,
 }
 
@@ -24,8 +28,7 @@ impl ClipboardData {
  */
 #[tauri::command]
 pub fn read_clipboard(
-    app_handle: tauri::AppHandle,
-    current_md5: String,
+    app_handle: tauri::AppHandle
 ) -> Result<ClipboardData, String> {
     let mut clipboard = clippers::Clipboard::get();
     match clipboard.read() {
@@ -43,9 +46,9 @@ pub fn read_clipboard(
         Some(clippers::ClipperData::Image(image)) => {
             let row_data = image.as_raw().rgba();
             let file_md5 = md5::compute(row_data);
-            if format!("{:x}", file_md5).to_string().eq(&current_md5) {
-                return Ok(ClipboardData::default());
-            }
+            // if format!("{:x}", file_md5).to_string().eq(&current_md5) {
+            //     return Ok(ClipboardData::default());
+            // }
             let mut cache_dir = app_handle.path_resolver().app_cache_dir().unwrap();
             if !cache_dir.exists() {
                 fs::create_dir(cache_dir.clone()).unwrap();
