@@ -1,8 +1,10 @@
 # dtools
 基于tauri实现的工具集合应用，支持插件安装
 
-最新代码请切换至 dev 分支
 ----
+
+⚠️ **最新代码请切换至 [dev](https://github.com/feint123/dtools/tree/dev) 分支**
+
 如果加载的插件中使用到了tauri的api，在编译项目前请先修改tauri的部分源码
 
 目录：tauri-1.2.3>src>api>ipc.rs>format_callback
