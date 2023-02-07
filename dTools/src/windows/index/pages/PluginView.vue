@@ -13,14 +13,13 @@ import PluginItem from "../components/PluginItem.vue";
 import { useToggle } from "@vueuse/shared";
 import { computed } from "@vue/reactivity";
 import { message } from '@tauri-apps/api/dialog';
-import { listen } from '@tauri-apps/api/event';
+import { emit, listen } from '@tauri-apps/api/event';
 import { Delete, Search } from '@element-plus/icons-vue'
 
 
 const { innerMainStyle, innerAsideStyle } = platformStyle();
 const pluginFrame = ref(null);
 const searchKeywords = ref("");
-const showFakeHeader = ref(true);
 const pluginList = ref([]);
 const cssHref = ref("");
 const scriptSrc = ref("");
@@ -82,7 +81,8 @@ onBeforeUnmount(() => {
 })
 
 function loadLocalWindowPlugins() {
-    selectLocalWindowPlugin((result) => {
+    selectLocalWindowPlugin().then((result) => {
+        console.log(result);
         result.forEach(async row => {
             const basePath = await resolve(await appDataDir(), 'plugins', row.IDENTIFIER, encodeURI(row.NAME));
             const iconPath = convertFileSrc(await resolve(basePath, 'icon.png'));
@@ -100,17 +100,16 @@ function loadLocalWindowPlugins() {
                 windowJS: windowJS,
             })
         });
-    }, (e) => { });
+    }).catch( (e) => { });
 }
 
 function choosePlugin(item) {
-    showFakeHeader.value = true;
+    emit(dToolsEvent.PLUGIN_SELECT_CHANGED, item);
     pluginFrame.value.contentWindow.location.reload();
     setTimeout(() => {
         cssHref.value = item.windowCSS;
         scriptSrc.value = item.windowJS;
         initPlugin();
-        showFakeHeader.value = false;
     }, 20)
 
 }

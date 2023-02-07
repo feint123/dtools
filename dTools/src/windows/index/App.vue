@@ -1,29 +1,51 @@
-<script setup>
+<script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import { DocumentCopy, Reading, MagicStick, SwitchFilled, Search } from '@element-plus/icons-vue'
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, StyleValue } from 'vue'
 // import { listen, TauriEvent } from '@tauri-apps/api/event';
 // import { appWindow } from '@tauri-apps/api/window';
 import { useRouter } from 'vue-router';
 import { useDark, useIntervalFn } from "@vueuse/core";
 import { closeDb } from '../../assets/js/db';
+import { dToolsEvent } from '../../assets/js/events';
 import { platformStyle } from '../../assets/js/styles';
 import { shortcuts } from '../../assets/js/shortcuts';
 import { init } from '../../assets/js/init';
 import { appWindow } from '@tauri-apps/api/window';
+import { convertFileSrc } from '@tauri-apps/api/tauri';
+import { listen } from '@tauri-apps/api/event';
 
 
 
 useDark()
 
-const { innerAsideStyle, mainStyle, headerStyle, asideStyle, toggleAside, asideSwitchStyle } = platformStyle();
-const router = useRouter();
+class LastPluginItem {
+    pluginId: number|string;
+    name:string;
+    icon:string;
+}
 
+const { innerAsideStyle, mainStyle, headerStyle, asideStyle, toggleAside, asideSwitchStyle } = platformStyle()!;
+const router = useRouter();
+const lastUsedPlugins:LastPluginItem[] = [{
+    pluginId: '',
+    icon: convertFileSrc('/Users/feint/Library/Application Support/com.feint.dev/plugins/com.feint.plugins/%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2/icon.png'),
+    name: '剪切板',
+},{
+    pluginId: '',
+    icon: convertFileSrc('/Users/feint/Library/Application Support/com.feint.dev/plugins/com.feint.plugins/%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2/icon.png'),
+    name: '剪切板',
+},{
+    pluginId: '',
+    icon: convertFileSrc('/Users/feint/Library/Application Support/com.feint.dev/plugins/com.feint.plugins/%E7%BC%96%E7%A0%81%E8%BD%AC%E6%8D%A2/icon.png'),
+    name: '剪切板',
+}];
 const PLUGIN_MENU = '/plugin'
 // const selectedMenu = ref(PLUGIN_MENU)
 const unListens = reactive({
     close: () => { },
+    selectPlugin: () => { },
 })
 
 router.replace(PLUGIN_MENU);
@@ -35,25 +57,19 @@ onMounted(async () => {
     unListens.close = await appWindow.onCloseRequested(async (event) => {
         event.preventDefault();
         appWindow.hide();
-    })
+    });
+    // 监听插件选择事件，用于记录最近使用的插件
+    unListens.selectPlugin = await listen<any>(dToolsEvent.PLUGIN_SELECT_CHANGED,(payload => {
+        
+    }))
     init()
 });
 
 onUnmounted(async () => {
     closeDb();
     unListens.close();
+    unListens.selectPlugin();
 })
-
-// useIntervalFn(async () => {
-//   // 防止在 clipboard 菜单时重复插入
-//   if (selectedMenu.value != CLIP_MENU) {
-//     // 全局更新剪切板内容
-//     paste().then((clipboard) => {
-//       insertClipContent(clipboard.content, clipboard.md5, clipboard.type, (result) => { });
-//     });
-//   }
-// }, 1000);
-
 
 function updateSelectMenu(index) {
     // selectedMenu.value = index;
@@ -77,7 +93,12 @@ function updateSelectMenu(index) {
                 <el-main :style="innerAsideStyle">
                     <el-menu default-active="plugin" class="unselectable" @select="updateSelectMenu">
                         <el-menu-item-group title="最近使用">
-                            <el-menu-item index="1-1" disabled>开发中...</el-menu-item>
+                            <el-menu-item index="1-1" v-for="item in lastUsedPlugins">
+                                <el-avatar class="plugin-icon" shape="square" :size="25" fit="fit" :src="item.icon" />
+                                <div class="plugin-line">
+                                    <span class="multi-text plugin-name">{{ item.name }}</span>
+                                </div>
+                            </el-menu-item>
                         </el-menu-item-group>
                         <el-menu-item-group title="我的最爱">
                             <el-menu-item index="1-1" disabled>开发中...</el-menu-item>
@@ -136,7 +157,7 @@ function updateSelectMenu(index) {
 }
 
 .el-menu-item.is-active {
-    background-color: var( --focus-background-color);
+    background-color: var(--focus-background-color);
     color: #E5EAF3;
     font-weight: bold;
     border-radius: 5px;
@@ -144,5 +165,9 @@ function updateSelectMenu(index) {
 
 .el-menu-item:hover {
     border-radius: 5px;
+}
+.plugin-icon {
+    height: 25px;
+    margin-right: 8px;
 }
 </style>
